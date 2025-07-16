@@ -1,75 +1,79 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { FlatList, Pressable, SafeAreaView, View, Text, Image, TouchableOpacity } from "react-native";
+import { images, offers } from "@/constants";
+import { Fragment } from "react";
+import cn from "clsx";
+import CartButton from "@/component/CartButton";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-
-export default function HomeScreen() {
+export default function Index() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView className="flex-1 bg-white">
+      <FlatList
+        data={offers}
+        keyExtractor={(item, index) => index.toString()}
+        contentContainerStyle={{ paddingBottom: 100 }} 
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={() => (
+        <View className="flex-row justify-between items-center px-5 py-4">
+            <View>
+              <Text className="font-semibold text-primary">DELIVER TO</Text>
+            <TouchableOpacity className="flex-row items-center gap-x-1 mt-1">
+              <Text className="font-bold text-black">Your Location</Text>
+              <Image source={images.arrowDown} className="w-3 h-3" resizeMode="contain" />
+            </TouchableOpacity>
+            </View>
+            <CartButton />
+        </View>
+        )}
+
+        renderItem={({ item, index }) => {
+          const isEven = index % 2 === 0;
+
+          return (
+            <View>
+              <Pressable
+                className={cn(
+                  "p-9 rounded-xl m-4 items-center",
+                  isEven ? "flex-row-reverse" : "flex-row"
+                )}
+                style={{ backgroundColor: item.color }}
+                android_ripple={{ color: "#FFFFFF22" }}
+              >
+                {({ pressed }) => (
+                  <Fragment>
+                    
+                    <View className="w-1/2 h-32 justify-center items-center">
+                      <Image
+                        source={item.image}
+                        className="w-full h-full"
+                        resizeMode="contain"
+                      />
+                    </View>
+
+                   
+                    <View
+                      className={cn(
+                        "w-1/2 h-32 justify-center items-center space-y-2",
+                        isEven ? "pl-10" : "pr-10"
+                      )}
+                    >
+                      <Text className="text-xl font-bold text-white text-center leading-tight">
+                        {item.title}
+                      </Text>
+                      <Image
+                        source={images.arrowRight}
+                        className="w-10 h-10"
+                        resizeMode="contain"
+                        tintColor="#ffffff"
+                      />
+                    </View>
+                  </Fragment>
+                )}
+              </Pressable>
+            </View>
+          );
+        }}
+      />
+      
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
