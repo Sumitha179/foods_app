@@ -6,6 +6,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        goldshade: '#FAC84F', // 🟡 custom gold
         primary: "#FE8C00",
         white: {
           DEFAULT: "#ffffff",

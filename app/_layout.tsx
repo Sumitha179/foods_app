@@ -1,29 +1,47 @@
-import { useFonts } from 'expo-font';
-import { SplashScreen, Stack } from 'expo-router';
-import React, { useEffect } from 'react';
+import { SplashScreen, Stack } from "expo-router";
 import '@/global.css';
+import { useFonts } from "expo-font";
+import { useEffect } from "react";
+import * as Sentry from '@sentry/react-native';
+import useAuthStore from "@/store/auth.store";
 
-// Ensure splash screen stays until fonts load
-SplashScreen.preventAutoHideAsync();
+Sentry.init({
+  dsn: 'https://3840505ac59bace27fe492d537a4ee76@o4509716313866240.ingest.us.sentry.io/4509716365246464',
 
-export default function RootLayout() {
-  const [fontsLoaded, err] = useFonts({
-    'Quicksand-Regular': require('../assets/fonts/Quicksand-Regular.ttf'),
-    'Quicksand-Bold': require('../assets/fonts/Quicksand-Bold.ttf'),
-    'Quicksand-Medium': require('../assets/fonts/Quicksand-Medium.ttf'),
-    'Quicksand-SemiBold': require('../assets/fonts/Quicksand-SemiBold.ttf'),
-    'Quicksand-Light': require('../assets/fonts/Quicksand-Light.ttf'),
+  // Adds more context data to events (IP address, cookies, user, etc.)
+  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+  sendDefaultPii: true,
+
+  // Configure Session Replay
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1,
+  integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+
+  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+  // spotlight: __DEV__,
+});
+
+
+export default Sentry.wrap(function RootLayout() {
+  const { isLoading, fetchAuthenticatedUser } = useAuthStore ();
+
+   const [fontsLoaded, error] = useFonts({
+    "QuickSand-Bold": require('../assets/fonts/Quicksand-Bold.ttf'),
+    "QuickSand-Medium": require('../assets/fonts/Quicksand-Medium.ttf'),
+    "QuickSand-Regular": require('../assets/fonts/Quicksand-Regular.ttf'),
+    "QuickSand-SemiBold": require('../assets/fonts/Quicksand-SemiBold.ttf'),
+    "QuickSand-Light": require('../assets/fonts/Quicksand-Light.ttf'),
   });
-
   useEffect(() => {
-    if (err) {
-      console.error('Font loading error:', err);
-    } else if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded, err]);
+    if(error) throw error;
+    if(fontsLoaded) SplashScreen.hideAsync();
+  }, [fontsLoaded, error]);
 
-  if (!fontsLoaded) return null;
+   useEffect(() => {
+    fetchAuthenticatedUser()
+  }, []);
 
-  return <Stack />;
-}
+  if(!fontsLoaded || isLoading) return null;
+
+  return <Stack screenOptions={{headerShown: false }} />;
+});

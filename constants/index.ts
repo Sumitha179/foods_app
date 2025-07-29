@@ -41,6 +41,10 @@ import salad from "@/assets/images/salad.png";
 import success from "@/assets/images/success.png";
 import tomatoes from "@/assets/images/tomatoes.png";
 import Pizzaimg from '@/assets/images/Pizzaimg.png';
+import pizzahut from '@/assets/images/pizzahut.png';
+import pizzalogo from '@/assets/images/Pizzalogo.png'
+
+
 
 
 export const CATEGORIES = [
@@ -202,4 +206,6 @@ export const images = {
     star,
     trash,
     user,
+    pizzahut,
+    pizzalogo,
 };

@@ -1,17 +1,24 @@
-import { Text } from 'react-native'
-import React from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { Slot } from 'expo-router'
+import {View,KeyboardAvoidingView, Platform, ScrollView, Dimensions, ImageBackground, Image} from 'react-native'
+import { Slot} from "expo-router";
+import {images} from "@/constants";
 
-const _layout = () => {
+
+export default function AuthLayout() {
   return (
+        <KeyboardAvoidingView behavior={Platform.OS === 'android' ? 'padding' : 'height'}>
+            <ScrollView className="bg-white h-full" keyboardShouldPersistTaps="handled">
+                <View className="w-full relative" style={{ height: Dimensions.get('screen').height / 2.25}}>
+                  <ImageBackground source={images.pizzahut} className="size-full rounded-b-lg" resizeMode="stretch" />
+                  <Image source={images.pizzalogo} className="self-center size-48 absolute -bottom-20 z-20" />
+                </View>
 
-    <SafeAreaView>
-      <Text>Auth layout</Text>
-      <Slot/>
-    </SafeAreaView>
-    
-  )
+              <Slot />  
+              
+            </ScrollView>
+            
+        </KeyboardAvoidingView>
+    )
 }
 
-export default _layout
+
+
