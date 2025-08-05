@@ -42,7 +42,8 @@ import success from "@/assets/images/success.png";
 import tomatoes from "@/assets/images/tomatoes.png";
 import Pizzaimg from '@/assets/images/Pizzaimg.png';
 import pizzahut from '@/assets/images/pizzahut.png';
-import pizzalogo from '@/assets/images/Pizzalogo.png'
+import pizzalogo from '@/assets/images/Pizzalogo.png';
+import wrapper from '@/assets/images/Wrapper.png';
 
 
 
@@ -70,30 +71,32 @@ export const CATEGORIES = [
     },
 ];
 
-export const offers: {id:number; title:string; image:any; color:string}[] = [
+export const offers: {
+  categoryId: string;id:number; title:string; image:any; color:string
+}[] = [
     {
         id: 1,
         title: "SUMMER COMBO",
         image: burgerOne,
-        color: "#D33B0D",
+        color: "#F94144",
     },
     {
         id: 2,
         title: "BURGER DELIGHT",
         image: burgerTwo,
-        color: "#DF5A0C",
+        color: "#F8961E",
     },
     {
         id: 3,
         title: "PIZZA",
         image: Pizzaimg,
-        color: "#084137",
+        color: "#FF5E13",
     },
     {
         id: 4,
         title: "WRAP IT UP",
-        image: buritto,
-        color: "#EB920C",
+        image: wrapper,
+        color: "#1B5E53",
     },
     
 ];
