@@ -1,15 +1,18 @@
-import {Account,Client,Databases,ID,Query,
-  Storage,
-} from "react-native-appwrite";
+import { Account, Avatars, Client, Databases, ID, Query, Storage } from "react-native-appwrite";
 import { CreateUserParams, GetMenuParams, SignInParams } from "@/type";
+import { Platform } from "react-native";
+import "react-native-url-polyfill/auto";
 
-// ✅ Config
+// ✅ Appwrite Configuration
 export const appwriteConfig = {
-  endpoint: "https://fra.cloud.appwrite.io/v1",
-  projectId: "6878962c00106883d6d8",
-  platform: "com.panda.FoodApp",
+  endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT!,
+  projectId: process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID!,
+  platform: Platform.select({
+    android: "com.panda.foodapp", // Must match your registered Android package name
+    ios: "com.panda.foodapp.ios", // If you add iOS later
+  }) as string,
   databaseId: "68789da70014bc52ff82",
-  bucketId: "688b1c250002411ddf63",
+  bucketId: "68643e170015edaa95d7",
   userCollectionId: "68789e9a000e0cdd9e46",
   categoriesCollectionId: "688b165d002d37fff054",
   menuCollectionId: "688b16e3000cb7ff7377",
@@ -20,25 +23,29 @@ export const appwriteConfig = {
 // ✅ Initialize Appwrite Client
 export const client = new Client()
   .setEndpoint(appwriteConfig.endpoint)
-  .setProject(appwriteConfig.projectId);
+  .setProject(appwriteConfig.projectId)
+  .setPlatform(appwriteConfig.platform);
 
 export const account = new Account(client);
 export const databases = new Databases(client);
 export const storage = new Storage(client);
+export const avatars = new Avatars(client);
 
-// ✅ Ensure session exists
+// ✅ Ensure a session exists (anonymous or logged in)
 export const ensureSession = async () => {
   try {
     const session = await account.getSession("current").catch(() => null);
     if (!session) {
+      console.log("Creating anonymous session...");
       await account.createAnonymousSession();
     }
-  } catch (error: any) {
-    console.error("ensureSession Error:", error.message);
+  } catch (e: any) {
+    console.error("ensureSession Error:", e);
+    throw new Error(e?.message || "Failed to ensure session");
   }
 };
 
-// ✅ Create user and user document
+// ✅ Create User Account and Document
 export const createUser = async ({ email, password, name }: CreateUserParams) => {
   try {
     const newAccount = await account.create(ID.unique(), email, password, name);
@@ -46,10 +53,9 @@ export const createUser = async ({ email, password, name }: CreateUserParams) =>
 
     await signIn({ email, password });
 
-    // ✅ SAFE fallback avatar (no Avatars API)
-    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`;
+    const avatarUrl = avatars.getInitialsURL(name);
 
-    const userDoc = await databases.createDocument(
+    return await databases.createDocument(
       appwriteConfig.databaseId,
       appwriteConfig.userCollectionId,
       ID.unique(),
@@ -60,64 +66,63 @@ export const createUser = async ({ email, password, name }: CreateUserParams) =>
         avatar: avatarUrl,
       }
     );
-
-    return userDoc;
-  } catch (error: any) {
-    console.error("createUser Error:", error.message);
-    throw new Error(error.message);
+  } catch (e: any) {
+    console.error("CreateUser Error:", e);
+    throw new Error(e?.message || "Failed to create user");
   }
 };
 
-// ✅ Sign in user
+// ✅ Sign In User
 export const signIn = async ({ email, password }: SignInParams) => {
   try {
-    const session = await account.getSession("current").catch(() => null);
-    if (!session) {
+    const existingSession = await account.getSession("current").catch(() => null);
+    if (!existingSession) {
       await account.createEmailPasswordSession(email, password);
     }
-  } catch (error: any) {
-    console.error("signIn Error:", error.message);
-    throw new Error(error.message);
+  } catch (e: any) {
+    console.error("SignIn Error:", e);
+    throw new Error(e?.message || "Failed to sign in");
   }
 };
 
-// ✅ Sign out
+// ✅ Sign Out
 export const signOut = async () => {
   try {
     await account.deleteSession("current");
-  } catch (error: any) {
-    console.error("signOut Error:", error.message);
-    throw new Error(error.message);
+  } catch (e: any) {
+    console.error("SignOut Error:", e);
+    throw new Error(e?.message || "Failed to sign out");
   }
 };
 
-// ✅ Get current user
+// ✅ Get Current User
 export const getCurrentUser = async () => {
   try {
     const session = await account.getSession("current").catch(() => null);
     if (!session) return null;
 
     const currentAccount = await account.get();
-
-    const user = await databases.listDocuments(
+    const currentUser = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.userCollectionId,
       [Query.equal("accountId", currentAccount.$id)]
     );
 
-    if (!user.documents.length) throw new Error("User document not found");
-    return user.documents[0];
-  } catch (error: any) {
-    console.error("getCurrentUser Error:", error.message);
-    throw new Error(error.message);
+    if (!currentUser.documents.length) throw new Error("User doc not found");
+
+    return currentUser.documents[0];
+  } catch (e: any) {
+    console.error("getCurrentUser Error:", e);
+    throw new Error(e?.message || "Failed to get current user");
   }
 };
 
-// ✅ Get menu items
+// ✅ Get Menu Items
 export const getMenu = async ({ category, query }: GetMenuParams) => {
   try {
-    const queries: string[] = [];
+    await ensureSession();
 
+    const queries = [];
     if (category) queries.push(Query.equal("categories", category));
     if (query) queries.push(Query.search("name", query));
 
@@ -128,22 +133,23 @@ export const getMenu = async ({ category, query }: GetMenuParams) => {
     );
 
     return menuItems.documents;
-  } catch (error: any) {
-    console.error("getMenu Error:", error.message);
-    throw new Error(error.message);
+  } catch (e: any) {
+    console.error("getMenu Error:", e);
+    throw new Error(e?.message || "Failed to fetch menu");
   }
 };
 
-// ✅ Get categories
+// ✅ Get Categories
 export const getCategories = async () => {
   try {
+    await ensureSession();
     const categories = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.categoriesCollectionId
     );
     return categories.documents;
-  } catch (error: any) {
-    console.error("getCategories Error:", error.message);
-    throw new Error(error.message);
+  } catch (e: any) {
+    console.error("getCategories Error:", e);
+    throw new Error(e?.message || "Failed to fetch categories");
   }
 };

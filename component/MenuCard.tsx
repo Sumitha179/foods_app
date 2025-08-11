@@ -1,7 +1,10 @@
-import { Text, TouchableOpacity, Image, Platform, View, ToastAndroid } from 'react-native';
+import { Text, TouchableOpacity, Image, Platform, View, ToastAndroid, Dimensions } from 'react-native';
 import { MenuItem } from '@/type';
 import { appwriteConfig, storage } from '@/lib/appwrite';
 import { useCartStore } from '@/store/cart.store';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const CARD_WIDTH = (SCREEN_WIDTH - 16 * 3) / 2; // 2 cards with 16px margin
 
 const formatINR = (amount: number) =>
   new Intl.NumberFormat('en-IN', {
@@ -12,17 +15,14 @@ const formatINR = (amount: number) =>
 
 const MenuCard = ({ item }: { item: MenuItem }) => {
   const { $id, name, price, image_url } = item;
+  const { addItem } = useCartStore();
 
-  // ✅ Use File ID directly
-  const fileId = image_url;
   let previewUrl = '';
   try {
-    previewUrl = storage.getFileView(appwriteConfig.bucketId, fileId).toString();
+    previewUrl = storage.getFilePreview(appwriteConfig.bucketId, image_url).toString();
   } catch (err) {
-    console.warn('❗ Error generating image URL:', err);
+    console.warn('❗ Error generating image preview URL:', err);
   }
-
-  const { addItem } = useCartStore();
 
   const handleAddToCart = () => {
     addItem({
@@ -41,6 +41,7 @@ const MenuCard = ({ item }: { item: MenuItem }) => {
   return (
     <View
       style={{
+        width: CARD_WIDTH,
         backgroundColor: '#fff',
         borderRadius: 20,
         padding: 16,
@@ -50,18 +51,16 @@ const MenuCard = ({ item }: { item: MenuItem }) => {
         shadowRadius: 6,
         shadowOffset: { width: 0, height: 2 },
         elevation: 4,
-        flex: 1,
-        marginHorizontal: 8,
       }}
     >
       <Image
         source={{ uri: previewUrl }}
         style={{
-          width: 72,
-          height: 72,
-          borderRadius: 36,
+          width: 80,
+          height: 80,
+          borderRadius: 40,
           marginBottom: 12,
-          backgroundColor: '#f9f9f9',
+          backgroundColor: '#f0f0f0',
         }}
         resizeMode="contain"
       />

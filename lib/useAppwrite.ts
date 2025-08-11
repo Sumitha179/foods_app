@@ -34,7 +34,7 @@ const useAppwrite = <T, P extends Record<string, any>>({
       } catch (err: any) {
         const message = err instanceof Error ? err.message : "Unknown error occurred";
         setError(message);
-        Alert.alert("Error", message);
+           console.error("useAppwrite Error:", message, err);
       } finally {
         setLoading(false);
       }
@@ -49,8 +49,13 @@ const useAppwrite = <T, P extends Record<string, any>>({
   }, [fetchData, skip]);
 
   const refetch = async (newParams?: P) => {
-    await fetchData(newParams || params);
-  };
+    try {
+      await fetchData(newParams || params);
+    } catch (error) {
+      // error already handled in fetchData. this just prevents unhandled promise rejections
+      console.error("Refetch error:", error);
+    }
+  }; 
 
   return { data, loading, error, refetch };
 };

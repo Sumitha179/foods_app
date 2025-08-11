@@ -1,93 +1,109 @@
-import { FlatList, Pressable,  View, Text, Image, TouchableOpacity } from 'react-native';
-import { images, offers } from "@/constants";
-import { Fragment } from "react";
-import cn from "clsx";
+import {
+  FlatList,
+  Pressable,
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+} from "react-native";
+import { offers, images } from "@/constants";
 import CartButton from "@/component/CartButton";
-import useAuthStore from '@/store/auth.store';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-
-
+import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
+import { Fragment } from "react";
+import useAuthStore from "@/store/auth.store";
 
 export default function Index() {
   const { user } = useAuthStore();
 
- return (
-    <SafeAreaView className="flex-1 bg-white ">
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <FlatList
         data={offers}
         keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={{ paddingBottom: 100 }} 
+        contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={() => (
-        <View className="flex-row justify-between items-center px-5 py-4">
+          <View style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingHorizontal: 20,
+            paddingVertical: 20
+          }}>
             <View>
-              <Text className="font-semibold text-primary">DELIVER TO</Text>
-            <TouchableOpacity className="flex-row items-center gap-x-1 mt-1">
-              <Text className="font-bold text-black">Your Location</Text>
-              <Image source={images.arrowDown} className="w-3 h-3" resizeMode="contain" />
-            </TouchableOpacity>
+              <Text style={{ fontWeight: "600", color: "#FFA500", fontSize: 18 }}>DELIVER TO</Text>
+              <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
+                <Text style={{ fontWeight: "bold", color: "#222", fontSize: 16 }}>Your Location</Text>
+                <Image
+                  source={images.arrowDown}
+                  style={{ width: 12, height: 12, marginLeft: 6 }}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
             </View>
             <CartButton />
-        </View>
-      )}
-
+          </View>
+        )}
         renderItem={({ item, index }) => {
           const isEven = index % 2 === 0;
-
           return (
-            <View>
-              <Pressable
-                className={cn(
-                  "p-9 rounded-xl m-4 items-center",
-                  isEven ? "flex-row-reverse" : "flex-row"
-                )}
-                style={{ backgroundColor: item.color }}
-                android_ripple={{ color: "#FFFFFF22" }}
-              >
-                {({ pressed }) => (
-                  <Fragment>
-                    
-                    <View className="w-1/2 h-32 justify-center items-center">
-                      <Image
-                        source={item.image}
-                        className="w-full h-full"
-                        resizeMode="contain"
-                      />
-                    </View>
-
-                   
-                    <View
-                      className={cn(
-                        "w-1/2 h-32 justify-center items-center space-y-2",
-                        isEven ? "pl-10" : "pr-10"
-                      )}
-                    >
-                      <Text className="text-xl font-bold text-white text-center leading-tight">
-                        {item.title}
-                      </Text>
-                      <Image
-                        source={images.arrowRight}
-                        className="w-10 h-10"
-                        resizeMode="contain"
-                        tintColor="#ffffff"
-                      />
-                    </View>
-                  </Fragment>
-                )}
-              </Pressable>
-            </View>
+            <Pressable
+              onPress={() =>
+                router.push({
+                  pathname: "/filterScreen",
+                  params: {
+                    categoryId: item.categoryId,
+                    title: item.title,
+                  },
+                })
+              }
+              style={{
+                padding: 24,
+                borderRadius: 18,
+                margin: 16,
+                flexDirection: isEven ? "row-reverse" : "row",
+                alignItems: "center",
+                backgroundColor: item.color || "#FFA000"
+              }}
+              android_ripple={{ color: "#FFFFFF22" }}
+            >
+              {/* Image */}
+              <View style={{ width: "50%", height: 128, justifyContent: "center", alignItems: "center" }}>
+                <Image
+                  source={item.image}
+                  style={{ width: "100%", height: "100%", borderRadius: 12 }}
+                  resizeMode="contain"
+                />
+              </View>
+              {/* Text */}
+              <View style={{
+                width: "50%",
+                height: 128,
+                justifyContent: "center",
+                alignItems: "center",
+                paddingLeft: isEven ? 24 : 0,
+                paddingRight: !isEven ? 24 : 0
+              }}>
+                <Text style={{
+                  fontSize: 22,
+                  fontWeight: "bold",
+                  color: "#fff",
+                  textAlign: "center",
+                  marginBottom: 10
+                }}>
+                  {item.title}
+                </Text>
+                <Image
+                  source={images.arrowRight}
+                  style={{ width: 32, height: 32, tintColor: "#fff" }}
+                  resizeMode="contain"
+                />
+              </View>
+            </Pressable>
           );
         }}
-
-      // ListFooterComponent={() =>(
-      // <Button 
-      //     title='Try!' 
-      //     onPress={ () => { Sentry.captureException(new Error('First error')) }}/>
-      // )}
-       
       />
-      
     </SafeAreaView>
   );
 }

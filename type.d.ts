@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-unresolved
 import { Models } from "react-native-appwrite";
 
 export interface MenuItem extends Models.Document {
@@ -18,6 +17,9 @@ export interface Category extends Models.Document {
 }
 
 export interface User extends Models.Document {
+    addressHome: string;
+    addressWork: string;
+    phone: string;
     name: string;
     email: string;
     avatar: string;

@@ -1,9 +1,12 @@
+import 'react-native-url-polyfill/auto';
 import { SplashScreen, Stack } from "expo-router";
 import '@/global.css';
 import { useFonts } from 'expo-font';
 import { useEffect } from "react";
 import * as Sentry from '@sentry/react-native';
 import useAuthStore from "@/store/auth.store";
+
+
 
 Sentry.init({
   dsn: 'https://3840505ac59bace27fe492d537a4ee76@o4509716313866240.ingest.us.sentry.io/4509716365246464',

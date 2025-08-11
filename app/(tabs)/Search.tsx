@@ -17,6 +17,7 @@ const Search = () => {
     fn: getMenu,
     params: { category, query, limit: 6 },
   });
+
   const { data: categories } = useAppwrite({ fn: getCategories });
 
   useEffect(() => {
@@ -27,9 +28,7 @@ const Search = () => {
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <FlatList
         data={data}
-        renderItem={({ item }) => (
-          <MenuCard item={item as MenuItem} />
-        )}
+        renderItem={({ item }) => <MenuCard item={item as unknown as MenuItem} />}
         keyExtractor={(item) => item.$id}
         numColumns={2}
         columnWrapperStyle={{
@@ -39,28 +38,40 @@ const Search = () => {
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingBottom: 100,
-          paddingTop: 6,
         }}
         ListHeaderComponent={() => (
-          <View style={{ marginTop: 18, marginBottom: 10 }}>
-            {/* Top Header Row */}
+          <View style={{ paddingBottom: 10 }}>
+            {/* Header */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <View>
-                <Text style={{ fontSize: 12, fontWeight: '600', color: '#FFA500', textTransform: 'uppercase' }}>Search</Text>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#222', marginTop: 2 }}>Find your favorite food</Text>
+                <Text style={{ fontSize: 12, fontWeight: '600', color: '#FFA500', textTransform: 'uppercase' }}>
+                  Search
+                </Text>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#222', marginTop: 2 }}>
+                  Find your favorite food
+                </Text>
               </View>
               <CartButton />
             </View>
 
+            {/* Search Bar */}
             <View style={{ marginTop: 16 }}>
               <SearchBar />
             </View>
+
+            {/* Categories Filter */}
             <View style={{ marginTop: 18 }}>
-              <Filter categories={categories || []} />
+              <Filter
+                categories={(categories || []).map((cat: any) => ({
+                  $id: cat.$id,
+                  name: cat.name ?? '',
+                  description: cat.description ?? '',
+                }))}
+              />
             </View>
           </View>
         )}
-        ListEmptyComponent={() =>
+        ListEmptyComponent={
           !loading && (
             <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 60 }}>
               <Text style={{ textAlign: 'center', marginTop: 18, color: '#888', fontSize: 16 }}>

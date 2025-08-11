@@ -72,6 +72,7 @@ export const CATEGORIES = [
 ];
 
 export const offers: {
+  items(items: any): unknown;
   categoryId: string;id:number; title:string; image:any; color:string
 }[] = [
     {
